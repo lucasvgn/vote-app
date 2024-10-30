@@ -1,0 +1,29 @@
+name: Deploy Docker Image
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into server
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.91.134.87.233 }}
+          username: ${{ secrets.adminlucas }}
+          key: ${{ secrets.xx }}
+          port: 22
+          source: "."
+          target: "/path/to/deployment"
+
+      - name: Deploy the Docker container
+        run: |
+          ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} '
+          docker pull ghcr.io/${{ github.repository_owner }}/<NOM_IMAGE>:latest &&
+          docker-compose -f /path/to/deployment/docker-compose.yml up -d
+          '
