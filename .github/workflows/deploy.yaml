@@ -1,29 +1,26 @@
-name: Deploy Docker Image
+name: Deploy to Server
 
 on:
   workflow_run:
-    workflows: ["Build and Publish Docker Image"]
-    types:
-      - completed
+    workflows: ["Create and publish a Docker image"]
+    types: [completed]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: SSH into server
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.91.134.87.233 }}
-          username: ${{ secrets.adminlucas }}
-          key: ${{ secrets.xx }}
-          port: 22
-          source: "."
-          target: "/path/to/deployment"
+    - name: Install SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        ssh-known-hosts: ${{ secrets.SERVER_IP }}
 
-      - name: Deploy the Docker container
-        run: |
-          ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} '
-          docker pull ghcr.io/${{ github.repository_owner }}/<NOM_IMAGE>:latest &&
-          docker-compose -f /path/to/deployment/docker-compose.yml up -d
-          '
+    - name: Pull and Deploy with Docker Compose
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+          cd example-voting-app && \
+          docker-compose pull && \
+          docker-compose up -d
+          "
