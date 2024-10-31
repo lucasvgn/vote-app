@@ -28,11 +28,11 @@ button i{
 }
 
 button.a{
-  background-color: #1aaaf8;
+  background-color: #006bf7;
 }
 
 button.b{
-  background-color: #df0315;
+  background-color: #cb0000;
 }
 
 #tip{
@@ -46,7 +46,7 @@ button.b{
   bottom: 100px;
   right: 0;
   left: 0;
-  color: #8f9ea8;
+  color: #000000;
   font-size: 24px;
 }
 
